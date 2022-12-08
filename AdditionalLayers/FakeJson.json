@@ -1,0 +1,89 @@
+{
+  "1" : {
+    "input_layer": null,
+    "output_layer": [4, 5],
+    "layer_data": {
+      "name": "InputLayer",
+      "target_shape": [50]
+    }
+  },
+  "2" : {
+    "input_layer": null,
+    "output_layer": [6, 7],
+    "layer_data": {
+      "name": "InputLayer",
+      "target_shape": [30]
+    }
+  },
+  "3" : {
+    "input_layer": null,
+    "output_layer": [6, 9, 10],
+    "layer_data": {
+      "name": "InputLayer",
+      "target_shape": [40]
+    }
+  },
+  "4" : {
+    "input_layer": [1, 6],
+    "output_layer": [5],
+    "layer_data": {
+      "name": "ConcatenationLayer",
+      "target_shape_list": [[50], [70]],
+      "dim": -1
+    }
+  },
+  "5" : {
+    "input_layer": [1, 4],
+    "output_layer": [8],
+    "layer_data": {
+      "name": "ConcatenationLayer",
+      "target_shape_list": [[50],[120]],
+      "dim": -1
+    }
+  },
+  "6" : {
+    "input_layer": [2, 3],
+    "output_layer": [4, 7],
+    "layer_data": {
+      "name": "ConcatenationLayer",
+      "target_shape_list": [[30], [40]],
+      "dim": -1
+    }
+  },
+  "7" : {
+    "input_layer": [2, 6],
+    "output_layer": [8],
+    "layer_data": {
+      "name": "ConcatenationLayer",
+      "target_shape_list": [[30], [70]],
+      "dim": -1
+    }
+  },
+  "8" : {
+    "input_layer": [5, 7, 10],
+    "output_layer": null,
+    "layer_data": {
+      "name": "ConcatenationLayer",
+      "target_shape_list": [[170],[100], [50]],
+      "dim": -1
+    }
+  },
+  "9" : {
+    "input_layer": [3],
+    "output_layer": [10],
+    "layer_data": {
+      "name": "LinearLayer",
+      "target_shape": [40],
+      "out_features": [10]
+    }
+  },
+  "10" : {
+    "input_layer": [3, 9],
+    "output_layer": [8],
+    "layer_data": {
+      "name": "ConcatenationLayer",
+      "target_shape_list": [[40], [10]],
+      "dim": -1
+    }
+  }
+}
