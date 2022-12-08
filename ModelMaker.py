@@ -143,7 +143,7 @@ class MainModel(nn.Module):
 
 
 if __name__ == '__main__':
-    my_layer_dict = read_json("./AdditionalLayers/FakeJson.json")
+    my_layer_dict = read_json("FakeJson.json")
 
     my_output_layer_id_list = ["8"]
 
