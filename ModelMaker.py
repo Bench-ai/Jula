@@ -65,8 +65,8 @@ def get_seen_set(layer_dict: dict,
 
                 if i not in seen_set:
                     iterate(in_layer_dict,
-                            str(i),
-                            in_layer_dict[str(i)])
+                            i,
+                            in_layer_dict[i])
 
             seen_set.add(in_output_layer_id)
 

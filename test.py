@@ -1,10 +1,5 @@
 import torch
 from pprint import pprint
-
-from torch import nn
-
-from AdditionalLayers.BaseLayer import InputLayer
-from AdditionalLayers.Linear import LinearLayer
 from ModelMaker import MainModel, read_json, get_seen_set
 
 j = read_json("./FakeJson2.json")
@@ -24,20 +19,3 @@ data = {
 }
 
 print(my_model(data))
-
-
-class TestLayer(nn.Module):
-
-    def __init__(self):
-        super().__init__()
-        self.__fc1 = nn.Linear(10,
-                               30)
-
-    def forward(self,
-                x: torch.Tensor) -> torch.Tensor:
-        return self.__fc1(x)
-
-
-model = TestLayer()
-
-print(model(torch.ones(size=(1, 10))))
