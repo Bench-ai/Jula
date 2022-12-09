@@ -1,13 +1,25 @@
-import typing
 import AdditionalLayers.Exceptions as e
 import torch
 import torch.nn as nn
 
 
+def check_size(x_size: torch.Size,
+               y_size: torch.Size):
+    if x_size != y_size:
+        raise e.IncorrectShapeError(x_size,
+                                    y_size)
+
+
+def check_multi_size(x_size_list: list[torch.Size],
+                     y_size_list: list[torch.Size]):
+    for i, j in zip(x_size_list, y_size_list):
+        check_size(i, j)
+
+
 class InputLayer(nn.Module):
 
     def __init__(self,
-                 target_shape: typing.Tuple[int, ...]):
+                 target_shape: tuple[int, ...]):
         """
         Parameters
         ----------
@@ -15,7 +27,7 @@ class InputLayer(nn.Module):
         """
 
         super(InputLayer, self).__init__()
-        self.__target_shape = target_shape
+        self.__target_shape = torch.Size(target_shape)
 
     def forward(self,
                 x: torch.Tensor) -> torch.Tensor:
@@ -29,59 +41,15 @@ class InputLayer(nn.Module):
         -------
 
         """
-        if tuple(x.size()[1:]) != self.__target_shape:
-            raise e.IncorrectShapeError(self.__target_shape,
-                                        x.size()[1:])
+
+        check_size(x.size()[1:], self.__target_shape)
 
         return x
 
-    def get_output_shape(self) -> typing.Tuple[int, ...]:
+    def get_output_shape(self) -> tuple[int, ...]:
         """
         Returns the target_size since no changes to the size occur
         -------
         """
 
         return self.__target_shape
-
-
-class InputLayer2(nn.Module):
-
-    def __init__(self,
-                 target_shape_list: typing.List[typing.Tuple[int, ...]]):
-        """
-        Parameters
-        ----------
-        target_shape_list: A list of all tensor shapes that will be passed in.
-        """
-
-        super(InputLayer2, self).__init__()
-        self.__target_shape_list = target_shape_list
-
-    def forward(self,
-                tensor_list: typing.List[torch.Tensor]) -> typing.List[torch.Tensor]:
-        """
-
-        Parameters
-        ----------
-        tensor_list: A list of tensors that will be passed into the model
-
-        Returns the exact same Tensor List
-        -------
-
-        """
-
-        for idx, ten in enumerate(tensor_list):
-
-            if tuple(ten.size()[1:]) != self.__target_shape_list[idx]:
-                raise e.IncorrectShapeError(self.__target_shape_list[idx],
-                                            ten.size()[1:])
-
-        return tensor_list
-
-    def get_output_shape(self) -> typing.Tuple[int, ...]:
-        """
-        Returns the size of the first target tensor since no changes occur
-        -------
-        """
-
-        return self.__target_shape_list[0]

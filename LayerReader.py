@@ -1,48 +1,55 @@
+import typing
+
 from AdditionalLayers.BaseLayer import InputLayer
 from AdditionalLayers.Activations import SigmoidLayer, SoftMaxLayer, ReluLayer, TanhLayer
 from AdditionalLayers.FunctionalLayers import ConcatenationLayer
 from AdditionalLayers.Linear import LinearLayer
 
 
-class LinearSwitch:
+class LayerSwitch:
 
-    def __init__(self,
-                 layer_name: str,
-                 parameter_dict: dict):
+    def __init__(self):
 
+        self.__parameter_dict = None
+
+    def get_layer(self,
+                  layer_name: str,
+                  parameter_dict: dict) -> typing.Union[InputLayer,
+                                                        SoftMaxLayer,
+                                                        SigmoidLayer,
+                                                        ReluLayer,
+                                                        TanhLayer,
+                                                        ConcatenationLayer,
+                                                        LinearLayer]:
         """
-
         Parameters
         ----------
-        layer_name: the name of the layer which the user wishes to receive
-        parameter_dict: the parameters required for the layer
-        """
+        layer_name: The name of the layer you wish to receive
+        parameter_dict: The contents of that layers parameters
 
-        self.__layer_name = layer_name
-        self.__parameter_dict = parameter_dict
-
-    def get_layer(self):
-        """
-        Returns: The layer the user chose in the initialization method
+        Returns
         -------
-        """
-        return getattr(self, "__{}".format(self.__layer_name))
 
-    def __InputLayer(self):
+        """
+
+        self.__parameter_dict = parameter_dict
+        return getattr(self, "{}".format(layer_name))()
+
+    def InputLayer(self) -> InputLayer:
         """
         Returns the InputLayer
         -------
         """
         return InputLayer(**self.__parameter_dict)
 
-    def __SigmoidLayer(self):
+    def SigmoidLayer(self) -> SigmoidLayer:
         """
         Returns the SigmoidLayer
         -------
         """
         return SigmoidLayer(**self.__parameter_dict)
 
-    def __SoftMaxLayer(self):
+    def SoftMaxLayer(self) -> SoftMaxLayer:
         """
         Returns the SoftmaxLayer
         -------
@@ -50,7 +57,7 @@ class LinearSwitch:
         """
         return SoftMaxLayer(**self.__parameter_dict)
 
-    def __ReluLayer(self):
+    def ReluLayer(self) -> ReluLayer:
         """
         Returns the Relu Layer
         -------
@@ -58,7 +65,7 @@ class LinearSwitch:
         """
         return ReluLayer(**self.__parameter_dict)
 
-    def __TanhLayer(self):
+    def TanhLayer(self) -> TanhLayer:
         """
         Returns the Tanh layer
         -------
@@ -66,7 +73,7 @@ class LinearSwitch:
         """
         return TanhLayer(**self.__parameter_dict)
 
-    def __ConcatenationLayer(self):
+    def ConcatenationLayer(self) -> ConcatenationLayer:
         """
         Returns the Concatenation Layer
         -------
@@ -74,7 +81,7 @@ class LinearSwitch:
         """
         return ConcatenationLayer(**self.__parameter_dict)
 
-    def __LinearLayer(self):
+    def LinearLayer(self) -> LinearLayer:
         """
         Returns the Linear Layer
         -------

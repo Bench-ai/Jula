@@ -12,8 +12,8 @@
     "output_layer": ["3"],
     "layer_data": {
       "name": "LinearLayer",
-      "target_shape": [10],
-      "out_features": [20]
+      "target_shape": 10,
+      "out_features": 20
     }
   },
   "2" : {
@@ -38,8 +38,8 @@
     "output_layer": ["1", "5", "8"],
     "layer_data": {
       "name": "LinearLayer",
-      "target_shape": [50],
-      "out_features": [10]
+      "target_shape": 50,
+      "out_features": 10
     }
   },
   "5" : {
@@ -65,8 +65,8 @@
     "output_layer": ["6"],
     "layer_data": {
       "name": "LinearLayer",
-      "target_shape_list": [40],
-      "out_features": [20]
+      "target_shape": 40,
+      "out_features": 20
     }
   },
   "8" : {
@@ -74,8 +74,8 @@
     "output_layer": null,
     "layer_data": {
       "name": "LinearLayer",
-      "target_shape": [10],
-      "out_features": [1]
+      "target_shape": 10,
+      "out_features": 1
     }
   },
   "9" : {

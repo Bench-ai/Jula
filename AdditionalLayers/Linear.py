@@ -1,13 +1,12 @@
-import typing
 import torch
 import torch.nn as nn
-from AdditionalLayers.BaseLayer import InputLayer
+from AdditionalLayers.BaseLayer import check_size
 
 
-class LinearLayer(InputLayer):
+class LinearLayer(nn.Module):
 
     def __init__(self,
-                 target_shape: typing.Tuple[int, ...],
+                 target_shape: int,
                  out_features: int,
                  bias=True):
         """
@@ -18,12 +17,12 @@ class LinearLayer(InputLayer):
         bias: Determines whether the layer will learn an additive bias.
         """
 
+        super(LinearLayer, self).__init__()
         self.__out_shape = out_features
-        self.__tar_shape = target_shape
+        self.__tar_shape = torch.Size([target_shape])
 
-        super(LinearLayer, self).__init__(target_shape)
-        self.__linear = nn.Linear(target_shape[-1],
-                                  out_features,
+        self.__linear = nn.Linear(target_shape,
+                                  self.__out_shape,
                                   bias)
 
     def get_output_shape(self) -> int:
@@ -36,15 +35,18 @@ class LinearLayer(InputLayer):
         return self.__out_shape
 
     def forward(self,
-                x: torch.Tensor) -> torch.Tensor:
+                x: list[torch.Tensor]) -> torch.Tensor:
+
+        x = x[0]
         """
 
         Parameters
         ----------
-        x: the tensor being fed into the layer
+        x: a list of tensors being fed into the model
 
-        Returns the sigmoid version of the layer
+        Returns the fully connected output of the layer
         -------
 
         """
-        return self.__linear(super()(x))
+        check_size(x.size()[1:], self.__tar_shape)
+        return self.__linear(x)
