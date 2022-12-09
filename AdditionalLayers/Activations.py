@@ -1,20 +1,20 @@
-import typing
 import torch
 import torch.nn as nn
-from AdditionalLayers.BaseLayer import InputLayer
+from AdditionalLayers.BaseLayer import check_size
 
 
-class SigmoidLayer(InputLayer):
+class SigmoidLayer(nn.Module):
 
     def __init__(self,
-                 target_shape: typing.Tuple[int, int, int]):
+                 target_shape: tuple[int, ...]):
         """
         Parameters
         ----------
         target_shape: the Expected shape of the input tensor
         """
-        super(SigmoidLayer, self).__init__(target_shape)
+        super(SigmoidLayer, self).__init__()
         self.__sigmoid = nn.Sigmoid()
+        self.__target_shape = torch.Size(target_shape)
 
     def forward(self,
                 x: torch.Tensor) -> torch.Tensor:
@@ -24,26 +24,28 @@ class SigmoidLayer(InputLayer):
         ----------
         x: the tensor being fed into the layer
 
-        Returns the sigmoid version of the layer
+        Returns the layer activated by the sigmoid function
         -------
 
         """
-        return self.__sigmoid(super()(x))
+        check_size(x.size()[1:], self.__target_shape)
+        return self.__sigmoid(x)
 
 
-class ReluLayer(InputLayer):
+class ReluLayer(nn.Module):
 
     def __init__(self,
-                 target_shape: typing.Tuple[int, int, int],
-                 inplace: bool):
+                 target_shape: tuple[int, ...],
+                 inplace=False):
         """
         Parameters
         ----------
         target_shape: the Expected shape of the input tensor
         inplace: Indicates whether you want the relu function to be inplace or not
         """
-        super(ReluLayer, self).__init__(target_shape)
+        super(ReluLayer, self).__init__()
         self.__relu = nn.ReLU(inplace=inplace)
+        self.__target_shape = torch.Size(target_shape)
 
     def forward(self,
                 x: torch.Tensor) -> torch.Tensor:
@@ -57,20 +59,22 @@ class ReluLayer(InputLayer):
         -------
 
         """
-        return self.__relu(super()(x))
+        check_size(x.size()[1:], self.__target_shape)
+        return self.__relu(x)
 
 
-class TanhLayer(InputLayer):
+class TanhLayer():
 
     def __init__(self,
-                 target_shape: typing.Tuple[int, int, int]):
+                 target_shape: tuple[int, ...]):
         """
         Parameters
         ----------
         target_shape: the Expected shape of the input tensor
         """
-        super(TanhLayer, self).__init__(target_shape)
+        super(TanhLayer, self).__init__()
         self.__tanh = nn.Tanh()
+        self.__target_shape = torch.Size(target_shape)
 
     def forward(self,
                 x: torch.Tensor) -> torch.Tensor:
@@ -84,22 +88,24 @@ class TanhLayer(InputLayer):
         -------
 
         """
-        return self.__tanh(super()(x))
+        check_size(x.size()[1:], self.__target_shape)
+        return self.__tanh(x)
 
 
-class SoftMaxLayer(InputLayer):
+class SoftMaxLayer(nn.Module):
 
     def __init__(self,
-                 target_shape: typing.Tuple[int, int, int],
-                 dim: typing.Optional[int]):
+                 target_shape: tuple[int, ...],
+                 dim: int):
         """
         Parameters
         ----------
         target_shape: the Expected shape of the input tensor
         dim: the dimension on which the softmax will be computed
         """
-        super(SoftMaxLayer, self).__init__(target_shape)
+        super(SoftMaxLayer, self).__init__()
         self.__softmax = nn.Softmax(dim)
+        self.__target_shape = torch.Size(target_shape)
 
     def forward(self,
                 x: torch.Tensor) -> torch.Tensor:
@@ -109,8 +115,9 @@ class SoftMaxLayer(InputLayer):
         ----------
         x: the tensor being fed into the layer
 
-        Returns the layer activated by the hyperbolic tangent function
+        Returns the layer activated by the Softmax function
         -------
 
         """
+        check_size(x.size()[1:], self.__target_shape)
         return self.__softmax(super()(x))

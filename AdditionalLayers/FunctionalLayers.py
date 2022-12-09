@@ -1,15 +1,13 @@
-import typing
 from copy import deepcopy
 import torch
 import torch.nn as nn
-
 from AdditionalLayers.BaseLayer import check_multi_size
 
 
 class ConcatenationLayer(nn.Module):
 
     def __init__(self,
-                 target_shape_list: typing.List[typing.Tuple[int, ...]],
+                 target_shape_list: list[tuple[int, ...]],
                  dim: int):
         """
         Parameters
@@ -23,7 +21,7 @@ class ConcatenationLayer(nn.Module):
         self.__dim = dim
 
     def forward(self,
-                tensor_list: typing.List[torch.Tensor]) -> torch.Tensor:
+                tensor_list: list[torch.Tensor]) -> torch.Tensor:
         """
 
         Parameters
@@ -40,7 +38,7 @@ class ConcatenationLayer(nn.Module):
 
         return torch.cat(tensor_list, dim=self.__dim)
 
-    def get_output_shape(self) -> typing.Tuple[int, ...]:
+    def get_output_shape(self) -> tuple[int, ...]:
         """
         Returns the new output size of the Tensor after concatenating based on the dimension
         -------

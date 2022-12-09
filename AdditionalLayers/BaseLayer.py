@@ -1,4 +1,3 @@
-import typing
 import AdditionalLayers.Exceptions as e
 import torch
 import torch.nn as nn
@@ -20,7 +19,7 @@ def check_multi_size(x_size_list: list[torch.Size],
 class InputLayer(nn.Module):
 
     def __init__(self,
-                 target_shape: typing.Tuple[int, ...]):
+                 target_shape: tuple[int, ...]):
         """
         Parameters
         ----------
@@ -47,7 +46,7 @@ class InputLayer(nn.Module):
 
         return x
 
-    def get_output_shape(self) -> typing.Tuple[int, ...]:
+    def get_output_shape(self) -> tuple[int, ...]:
         """
         Returns the target_size since no changes to the size occur
         -------

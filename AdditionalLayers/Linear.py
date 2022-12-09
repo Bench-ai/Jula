@@ -1,7 +1,6 @@
-import typing
 import torch
 import torch.nn as nn
-from AdditionalLayers.BaseLayer import InputLayer, check_size
+from AdditionalLayers.BaseLayer import check_size
 
 
 class LinearLayer(nn.Module):
