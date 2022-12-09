@@ -1,10 +1,12 @@
 import typing
 from copy import deepcopy
 import torch
-from AdditionalLayers.BaseLayer import InputLayer2
+import torch.nn as nn
+
+from AdditionalLayers.BaseLayer import check_multi_size
 
 
-class ConcatenationLayer(InputLayer2):
+class ConcatenationLayer(nn.Module):
 
     def __init__(self,
                  target_shape_list: typing.List[typing.Tuple[int, ...]],
@@ -16,8 +18,8 @@ class ConcatenationLayer(InputLayer2):
         dim: the dimension the concatenation occurs
         """
 
-        super(ConcatenationLayer, self).__init__(target_shape_list)
-        self.__target_shape_list = target_shape_list
+        super(ConcatenationLayer, self).__init__()
+        self.__target_shape_list = [torch.Size(i) for i in target_shape_list]
         self.__dim = dim
 
     def forward(self,
@@ -33,7 +35,8 @@ class ConcatenationLayer(InputLayer2):
 
         """
 
-        tensor_list = super(tensor_list)
+        x_size_list = [x.size()[1:] for x in tensor_list]
+        check_multi_size(x_size_list, self.__target_shape_list)
 
         return torch.cat(tensor_list, dim=self.__dim)
 
@@ -46,6 +49,6 @@ class ConcatenationLayer(InputLayer2):
         output_shape = list(deepcopy(self.__target_shape_list[0]))
 
         for size in self.__target_shape_list[1:]:
-            output_shape[self.__dim] += size[self.__dim]
+            output_shape[self.__dim] += list(size[self.__dim])
 
         return tuple(output_shape)

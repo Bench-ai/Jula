@@ -1,9 +1,9 @@
 import torch
-from numpy.ma import copy
+import copy
 from ordered_set import OrderedSet
 import json
 from torch import nn
-from LayerReader import LinearSwitch
+from LayerReader import LayerSwitch
 from typing import Union
 from AdditionalLayers import BaseLayer
 
@@ -100,12 +100,14 @@ class MainModel(nn.Module):
         self.__module_dict = nn.ModuleDict()
         self.__layer_json = layer_json
 
+        ls = LayerSwitch()
+
         for l_id in self.__seen_set:
             layer_dict = copy.deepcopy(layer_json[l_id])
             layer_name = layer_dict["layer_data"].pop("name")
 
             self.__module_dict.update({
-                l_id: LinearSwitch(layer_name, layer_dict["layer_data"]).get_layer()
+                l_id: ls.get_layer(layer_name, layer_dict["layer_data"])
             })
 
     def forward(self,
@@ -126,7 +128,7 @@ class MainModel(nn.Module):
 
         for l_id in self.__seen_set:
 
-            if isinstance(self.__module_dict[l_id], BaseLayer.InputLayer):
+            if type(self.__module_dict[l_id]) is BaseLayer.InputLayer:
                 layer_dictionary[l_id] = self.__module_dict[l_id](input_dict[l_id])
 
             else:
