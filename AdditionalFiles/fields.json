@@ -6,5 +6,6 @@
     "STR": "str"
   },
 
-  "valid_keys": ["parameter_list", "input_shape", "output_shape"]
+  "valid_keys": ["parameter_list", "input_shape", "output_shape"],
+  "allowed_keywords": ["BATCH", "ANY"]
 }

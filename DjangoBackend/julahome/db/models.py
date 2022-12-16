@@ -39,6 +39,8 @@ def validate_output_json(output_json: dict):
 
             if d_key == "input_shape":
 
+                for k, v in output_json[d_key].items():
+
 
     valid_keys = j_val["valid_keys"]
     pop_keys = copy.deepcopy(valid_keys)
