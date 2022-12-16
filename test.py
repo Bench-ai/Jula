@@ -1,21 +1,15 @@
 import torch
-from pprint import pprint
-from ModelMaker import MainModel, read_json, get_seen_set
+import torch.nn as nn
 
-j = read_json("./FakeJson2.json")
-seen_set = get_seen_set(j,
-                        ["8", "9"],
-                        [j["8"], j["9"]])
+rnn = nn.LSTM(10, 20, 2)
 
-pprint(seen_set)
+inp = torch.randn(5, 3, 10)
+h0 = torch.randn(2, 3, 20)
+c0 = torch.randn(2, 3, 20)
+output, (hn, cn) = rnn(inp, (h0, c0))
 
-my_model = MainModel(j, seen_set)
+inp = torch.randn(9, 3, 10)
+h0 = torch.randn(2, 3, 20)
+c0 = torch.randn(2, 3, 20)
 
-print(my_model)
-
-data = {
-    "0": torch.ones(size=(1, 50)),
-    "2": torch.ones(size=(1, 40))
-}
-
-print(my_model(data))
+output, (hn, cn) = rnn(inp, (h0, c0))
