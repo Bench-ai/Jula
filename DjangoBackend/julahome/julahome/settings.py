@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+dotenv_path = Path('D:/BenchAi/Jula/.env')
+load_dotenv(dotenv_path=dotenv_path)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,8 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'api',
-    'db'
+    'db',
+    'users',
+    'django.contrib.postgres'
 ]
 
 MIDDLEWARE = [
@@ -80,10 +85,10 @@ WSGI_APPLICATION = 'julahome.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'JulaDjango',
-        'USER': 'DjangoUser',
-        'PASSWORD': "x",
-        'PORT': 5432
+        'NAME': os.getenv("NAME"),
+        'USER': os.getenv("USER"),
+        'PASSWORD': os.getenv("PASSWORD"),
+        'PORT': os.getenv("PORT")
     }
 }
 
@@ -106,6 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'users.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
