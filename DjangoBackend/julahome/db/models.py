@@ -136,7 +136,7 @@ class Layer(models.Model):
                               validators=[py_content_validator,
                                           FileExtensionValidator(['py'])])
 
-    user_name = models.ForeignKey(User, on_delete=models.PROTECT, default="7dIBzIUoMo")
+    # user_name = models.ForeignKey(User, on_delete=models.PROTECT, default="7dIBzIUoMo")
 
     update_timestamp = models.DateTimeField(auto_now=True)
 
@@ -165,19 +165,20 @@ class Tag_Class(models.Model):
 
 
 class Tag(models.Model):
-    id = models.UUIDField(max_length=37,
-                          default=uuid4,
-                          editable=False,
-                          primary_key=True)
+    # id = models.UUIDField(max_length=37,
+    #                       default=uuid4,
+    #                       editable=False,
+    #                       primary_key=True)
 
     tag_name = models.CharField(max_length=100,
-                                help_text="the name of the tag")
+                                help_text="the name of the tag",
+                                primary_key=True)
 
     tag_class_name = models.ForeignKey(Tag_Class,
                                        on_delete=models.CASCADE,
                                        default="Z72tqCGEk4")
 
-    user_name = models.ForeignKey(User, on_delete=models.PROTECT, default="7dIBzIUoMo")
+    # user_name = models.ForeignKey(User, on_delete=models.PROTECT, default="7dIBzIUoMo")
 
     creation_timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -191,9 +192,9 @@ class TagLayerModel:
                           editable=False,
                           primary_key=True)
 
-    tag_id = models.ForeignKey(Tag,
-                               on_delete=models.PROTECT,
-                               default=uuid4)
+    tag_name = models.ForeignKey(Tag,
+                                 on_delete=models.PROTECT,
+                                 default=uuid4)
 
     layer_id = models.ForeignKey(Layer,
                                  on_delete=models.PROTECT,
