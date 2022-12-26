@@ -1,11 +1,12 @@
 import datetime
 from django.contrib.auth import get_user_model
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes, parser_classes
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import BasicAuthentication
 from rest_framework_api_key.permissions import HasAPIKey
-from .serializers import UserSerializer, TagClassSerializer
+from .serializers import UserSerializer, TagClassSerializer, LayerFileSerializer
 from rest_framework_api_key.models import APIKey
 
 
@@ -32,7 +33,7 @@ def grant_api_key(request):
                                                                          datetime.datetime.now()))
 
     serializer = UserSerializer(model_data,
-                                data={"api_key": "True"},
+                                data={"api_key": True},
                                 partial=True)
 
     if serializer.is_valid(raise_exception=True):
@@ -71,12 +72,20 @@ def insert_tag_class(request):
 
 @api_view(["POST"])
 @permission_classes([HasAPIKey])
-def insert_layer(request):
+@parser_classes([MultiPartParser, FormParser])
+def insert_layer_file(request):
     data = request.data
-    file = request.FILES.get("upload")
 
-    print(request.data)
-    print(file)
+    data = {"upload": data["file"]}
 
-    return Response({"valid": " 0000 missing elements in data"}, status=200)
+    ser = LayerFileSerializer(data=data)
 
+    if ser.is_valid(raise_exception=True):
+        ser.save()
+
+        data = ser.data
+
+        data.pop("upload")
+        return Response(data, status=200)
+
+    return Response({"Invalid": "Improper data was sent"}, status=400)

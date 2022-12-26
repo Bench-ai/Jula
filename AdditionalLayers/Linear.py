@@ -23,9 +23,9 @@ class LinearLayer(nn.Module):
                                   bias)
 
     def forward(self,
-                x: list[torch.Tensor]) -> torch.Tensor:
+                x: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
 
-        x = x[0]
+        x = x["input"]
         """
 
         Parameters
@@ -36,4 +36,4 @@ class LinearLayer(nn.Module):
         -------
 
         """
-        return self.__linear(x)
+        return {"output": self.__linear(x)}

@@ -7,7 +7,6 @@ from .managers import CustomUserManager
 
 class User(AbstractBaseUser, PermissionsMixin):
     user_name = models.CharField(max_length=100,
-                                 help_text="the name of the layer",
                                  primary_key=True)
 
     email = models.EmailField(
@@ -15,10 +14,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         unique=True,
     )
 
-    api_key = models.CharField(max_length=255,
-                               help_text="the name of the layer",
-                               unique=True,
-                               null=True)
+    api_key = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)  # a admin user; non super-user

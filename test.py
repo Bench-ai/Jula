@@ -77,26 +77,26 @@ j = {
     "tags": [
         [
             "LAYER",
-            "LinearLayer"
+            "Linear_Layer"
         ],
         [
             "LAYER",
-            "FullyConnected"
+            "Fully_Connected"
         ],
         [
             "LAYER",
-            "DENSELAYER"
+            "DENSE_LAYER"
         ]
     ]
 }
 
-payload = {"param_1": "value_1", "param_2": "value_2"}
-files = {
-    'json': (None, json.dumps(j), 'application/json'),
-    'file': (os.path.basename(file), open(file, 'rb'), 'application/octet-stream')
-}
-
-resp = requests.post(url,
-                     files=files,
-                     headers={"Authorization": "Api-Key {}".format(os.getenv("KEY"))})
+# payload = {"param_1": "value_1", "param_2": "value_2"}
+# files = {
+#     'json': (None, json.dumps(j), 'application/json'),
+#     'file': (os.path.basename(file), open(file, 'rb'), 'application/octet-stream')
+# }
+#
+# resp = requests.post(url,
+#                      files=files,
+#                      headers={"Authorization": "Api-Key {}".format(os.getenv("KEY"))})
 
