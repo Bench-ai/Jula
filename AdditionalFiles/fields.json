@@ -1,8 +1,8 @@
 {
   "valid_datatype": {
-    "INTEGER": "int",
-    "BOOL": "boolean",
-    "FLOAT": "float",
+    "INT": "int",
+    "BOL": "bool",
+    "FLO": "float",
     "STR": "str"
   },
 

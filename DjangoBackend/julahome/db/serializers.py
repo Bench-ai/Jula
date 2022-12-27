@@ -71,7 +71,7 @@ class LayerParameterSerializer(serializers.ModelSerializer):
         #                              options=data["options"],
         #                              is_deleted=data["is_deleted"])
 
-        return Layer.objects.create(**data)
+        return Layer_Parameter.objects.create(**data)
 
     def update(self, instance, validated_data):
         instance.layer_file_id = validated_data.get('layer_file_id', instance.layer_file_id)
@@ -193,8 +193,8 @@ class TagSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, data):
-        tag_class = Tag_Class.objects.create(tag_name=data["tag_name"],
-                                             tag_class_name=data["tag_class_name"])
+        tag_class = Tag.objects.create(tag_name=data["tag_name"],
+                                       tag_class_name=data["tag_class_name"])
 
         return tag_class
 
@@ -205,14 +205,14 @@ class TagLayerSerializer(serializers.ModelSerializer):
 
         fields = [
             "tag_name",
-            "layer_id"
+            "layer_id",
             "creation_timestamp",
             "is_deleted"
         ]
 
     def create(self, data):
-        tag_layer = Tag_Class.objects.create(tag_name=data["tag_name"],
-                                             layer_id=data["layer_id"])
+        tag_layer = Tag_Layer_Model.objects.create(tag_name=data["tag_name"],
+                                                   layer_id=data["layer_id"])
 
         return tag_layer
 
