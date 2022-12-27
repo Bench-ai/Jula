@@ -1,21 +1,102 @@
-import torch
-from pprint import pprint
-from ModelMaker import MainModel, read_json, get_seen_set
+import json
+import os
+from dotenv import load_dotenv
+import requests
+from pathlib import Path
 
-j = read_json("./FakeJson2.json")
-seen_set = get_seen_set(j,
-                        ["8", "9"],
-                        [j["8"], j["9"]])
+dotenv_path = Path('D:/BenchAi/Jula/.env')
+load_dotenv(dotenv_path=dotenv_path)
 
-pprint(seen_set)
 
-my_model = MainModel(j, seen_set)
 
-print(my_model)
+url = "http://127.0.0.1:8000/db/insert-layer"
+file = "D:\BenchAi\Jula\AdditionalLayers\Linear.py"
 
-data = {
-    "0": torch.ones(size=(1, 50)),
-    "2": torch.ones(size=(1, 40))
+j = {
+    "layer_name": "TestLinearLayer",
+    "layer_parameters": {
+        "parameter_list": {
+            "in_features": {
+                "description": "the size of the input features",
+                "default": None,
+                "type": "INTEGER",
+                "options": None
+            },
+            "out_features": {
+                "description": "the size of the output features",
+                "default": None,
+                "type": "INTEGER",
+                "options": None
+            },
+            "bias": {
+                "description": "Determines whether the layer will learn an additive bias.",
+                "default": True,
+                "type": "BOOL",
+                "options": None
+            }
+        },
+        "input_shape": [
+            {
+                "name": "input",
+                "shape": [
+                    [
+                        "{}",
+                        [
+                            "BATCH"
+                        ]
+                    ],
+                    [
+                        "{}",
+                        [
+                            "in_features"
+                        ]
+                    ]
+                ]
+            }
+        ],
+        "output_shape": [
+            {
+                "name": "output",
+                "shape": [
+                    [
+                        "{}",
+                        [
+                            "BATCH"
+                        ]
+                    ],
+                    [
+                        "{}",
+                        [
+                            "out_features"
+                        ]
+                    ]
+                ]
+            }
+        ]
+    },
+    "tags": [
+        [
+            "LAYER",
+            "Linear_Layer"
+        ],
+        [
+            "LAYER",
+            "Fully_Connected"
+        ],
+        [
+            "LAYER",
+            "DENSE_LAYER"
+        ]
+    ]
 }
 
-print(my_model(data))
+# payload = {"param_1": "value_1", "param_2": "value_2"}
+# files = {
+#     'json': (None, json.dumps(j), 'application/json'),
+#     'file': (os.path.basename(file), open(file, 'rb'), 'application/octet-stream')
+# }
+#
+# resp = requests.post(url,
+#                      files=files,
+#                      headers={"Authorization": "Api-Key {}".format(os.getenv("KEY"))})
+
