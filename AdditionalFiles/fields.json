@@ -9,7 +9,7 @@
   "valid_keys": ["parameter_list", "input_shape", "output_shape"],
   "allowed_keywords": ["BATCH", "ANY"],
   "not_allowed_chars": "[!@#$%&|<>:';?.,`~=_qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM\\[\\]]",
-  "allowed_operations": ["CEIL", "FLOOR"],
+  "allowed_operations": ["CEIL", "FLOOR", "UNK", "COPY"],
   "illegal_libs": ["imp", "sys", "os", "shutil", "ast"],
   "illegal_code": ["eval", "ast.literal_eval"]
 }

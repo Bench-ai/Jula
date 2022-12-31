@@ -146,7 +146,9 @@ class Layer_Input_Output(models.Model):
 class Input_Output_Channels(models.Model):
     OPERATION_CHOICES = [
         ("CEIL", "ceil"),
-        ("FLOR", "floor")
+        ("FLOR", "floor"),
+        ("AANY", "any"),
+        ("COPY", "copy")
     ]
 
     id = models.UUIDField(max_length=37,
