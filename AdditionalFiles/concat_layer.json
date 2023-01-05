@@ -1,0 +1,57 @@
+{
+  "variables": {
+    "input_shape_list": {
+      "parameter": true,
+      "type": "list",
+      "value": null
+    },
+    "dim": {
+      "parameter": true,
+      "type": "int",
+      "value": null
+    },
+    "y": {
+      "parameter": false,
+      "type": "int",
+      "value": "0"
+    },
+    "eqt": {
+      "parameter": false,
+      "type": "equation",
+      "value": null
+    },
+    "get": {
+      "parameter": false,
+      "type": "list",
+      "value": null
+    }
+  },
+  "equations":  [
+    {
+      "name": "eqt",
+      "equation_str": "y + g",
+      "variables": ["y", "g"]
+    }
+  ],
+  "command_strings": [
+    "{FOR} input_shape_list get BLOCK_ZERO",
+    "{UPDATE} get y dim"
+  ],
+  "blocks": {
+    "BLOCK_ZERO": {
+      "code": "{SET} y BLOCK_ONE",
+      "is_var": true
+    },
+    "BLOCK_ONE": {
+      "code": "{EVAL} eqt y BLOCK_TWO",
+      "is_var": false
+    },
+    "BLOCK_TWO": {
+      "code": "{GET_ITEM} get dim",
+      "is_var": false
+    }
+  },
+      "return_vars": [
+      "get"
+    ]
+}

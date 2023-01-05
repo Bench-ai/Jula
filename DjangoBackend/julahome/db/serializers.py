@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Layer, Tag_Class, Tag, Tag_Layer_Model, Layer_File, Layer_Parameter, Layer_Input_Output, \
-    Input_Output_Channels
+    Input_Output_Channels, Json_File, input_output_details
 from django.contrib.auth import get_user_model
 
 
@@ -25,23 +25,81 @@ class LayerFileSerializer(serializers.ModelSerializer):
         return instance
 
 
+class JsonFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Json_File
+        fields = ["id",
+                  "upload",
+                  "creation_timestamp"]
+
+    def create(self, data):
+        j = Json_File.objects.create(upload=data["upload"])
+
+        return j
+
+    def update(self, instance, validated_data):
+        instance.upload = validated_data.get('upload', instance.upload)
+        instance.save()
+
+        return instance
+
+
 class LayerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Layer
         fields = ["id",
                   "layer_name",
                   "layer_file_id",
-                  "creation_timestamp"]
+                  "layer_json_id",
+                  "forward_list",
+                  "forward_dict",
+                  "creation_timestamp",
+                  "default"]
 
     def create(self, data):
         layer = Layer.objects.create(layer_name=data["layer_name"],
-                                     layer_file_id=data["layer_file_id"])
+                                     layer_file_id=data["layer_file_id"],
+                                     layer_json_id=data["layer_json_id"],
+                                     forward_list=data["forward_list"],
+                                     forward_dict=data["forward_dict"],
+                                     default=data["default"])
 
         return layer
 
     def update(self, instance, validated_data):
         instance.layer_name = validated_data.get('layer_name', instance.layer_name)
         instance.layer_file_id = validated_data.get('layer_file_id', instance.layer_file_id)
+        instance.layer_file_id = validated_data.get('layer_json_id', instance.layer_json_id)
+        instance.is_deleted = validated_data.get('is_deleted', instance.is_deleted)
+        instance.forward_list = validated_data.get('forward_list', instance.forward_list)
+        instance.forward_dict = validated_data.get('forward_dict', instance.forward_dict)
+        instance.default = validated_data.get('default', instance.default)
+        instance.save()
+
+        return instance
+
+
+class InputOutputSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = input_output_details
+        fields = ["id",
+                  "layer_id",
+                  "name",
+                  "description",
+                  "is_output",
+                  "creation_timestamp"]
+
+    def create(self, data):
+        input_out = input_output_details.objects.create(layer_id=data["layer_id"],
+                                                        name=data["name"],
+                                                        description=data["description"],
+                                                        is_output=data["is_output"])
+
+        return input_out
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
         instance.is_deleted = validated_data.get('is_deleted', instance.is_deleted)
         instance.save()
 
@@ -55,10 +113,10 @@ class LayerParameterSerializer(serializers.ModelSerializer):
                   "layer_id",
                   "param_name",
                   "description",
-                  "default_value",
                   "type",
-                  "options",
+                  "default_and_options",
                   "creation_timestamp",
+                  "is_forward",
                   "is_deleted"]
 
     def create(self, data):
@@ -77,66 +135,10 @@ class LayerParameterSerializer(serializers.ModelSerializer):
         instance.layer_file_id = validated_data.get('layer_file_id', instance.layer_file_id)
         instance.param_name = validated_data.get('param_name', instance.param_name)
         instance.description = validated_data.get('description', instance.description)
-        instance.default_value = validated_data.get('default_value', instance.default_value)
         instance.type = validated_data.get('type', instance.type)
-        instance.options = validated_data.get('options', instance.options)
         instance.is_deleted = validated_data.get('is_deleted', instance.is_deleted)
-        instance.save()
-
-
-class LayerInputOutputSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Layer_Input_Output
-        fields = ["id",
-                  "layer_id",
-                  "input_name",
-                  "is_input",
-                  "is_deleted",
-                  "creation_timestamp"]
-
-    def create(self, data):
-        # lip = Layer_Input_Output.objects.create(layer_id=data["layer_id"],
-        #                                         input_name=data["input_name"],
-        #                                         is_input=data["is_input"],
-        #                                         is_deleted=data["is_deleted"])
-
-        return Layer_Input_Output.objects.create(**data)
-
-    def update(self, instance, validated_data):
-        instance.input_name = validated_data.get('input_name', instance.input_name)
-        instance.is_input = validated_data.get('is_input', instance.is_input)
-        instance.is_deleted = validated_data.get('is_deleted', instance.is_deleted)
-        instance.save()
-
-
-class InputOutputChannelsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Input_Output_Channels
-        fields = ["id",
-                  "input_id",
-                  "input_shape_str",
-                  "variables",
-                  "channel_number",
-                  "operation",
-                  "is_deleted",
-                  "creation_timestamp"]
-
-    def create(self, data):
-        # ioc = Input_Output_Channels.objects.create(input_id=data["input_id"],
-        #                                            input_shape_str=data["input_shape_str"],
-        #                                            variables=data["variables"],
-        #                                            channel_number=data["channel_number"],
-        #                                            operation=data["operation"],
-        #                                            is_deleted=data["is_deleted"])
-
-        return Input_Output_Channels.objects.create(**data)
-
-    def update(self, instance, validated_data):
-        instance.input_shape_str = validated_data.get('input_shape_str', instance.input_shape_str)
-        instance.variables = validated_data.get('variables', instance.variables)
-        instance.channel_number = validated_data.get('channel_number', instance.channel_number)
-        instance.operation = validated_data.get('operation', instance.operation)
-        instance.is_deleted = validated_data.get('is_deleted', instance.is_deleted)
+        instance.layer_file_id = validated_data.get('layer_file_id', instance.layer_file_id)
+        instance.default_and_options = validated_data.get('default_and_options', instance.default_and_options)
         instance.save()
 
 

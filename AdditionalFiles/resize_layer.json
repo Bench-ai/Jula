@@ -1,0 +1,106 @@
+{
+  "variables": {
+    "input_shape": {
+            "parameter": true,
+            "type": "list",
+            "value": null
+        },
+        "resize_shape": {
+            "parameter": true,
+            "type": "list",
+            "value": null
+        },
+        "x": {
+            "parameter": false,
+            "type": "int",
+            "value": "1"
+        },
+        "y": {
+            "parameter": false,
+            "type": "int",
+            "value": "0"
+        },
+        "z": {
+            "parameter": false,
+            "type": "int",
+            "value": "0"
+        },
+        "out": {
+            "parameter": false,
+            "type": "list",
+            "value": "[]"
+        },
+        "neg": {
+            "parameter": false,
+            "type": "int",
+            "value": "-1"
+        },
+        "eqt": {
+            "parameter": false,
+            "type": "equation",
+            "value": null
+        },
+        "eqt2": {
+            "parameter": false,
+            "type": "equation",
+            "value": null
+        }
+  },
+  "equations":  [
+            {
+            "name": "eqt",
+            "equation_str": "x / y",
+            "variables": ["x", "y"]
+        },
+        {
+            "name": "eqt2",
+            "equation_str": "x * z",
+            "variables": ["x", "z"]
+        }
+  ],
+  "command_strings": [
+    "{FOR} input_shape z BLOCK_ONE",
+        "{FOR} resize_shape y BLOCK_TWO"
+  ],
+  "blocks": {
+    "BLOCK_ONE": {
+            "code": "{SET} x BLOCK_NINE",
+            "is_var": true
+        },
+        "BLOCK_TWO": {
+            "code": "{IF_ELSE} BLOCK_THREE BLOCK_FOUR BLOCK_FIVE",
+            "is_var": true
+        },
+        "BLOCK_THREE": {
+            "code": "{EQUALS} neg y",
+            "is_var": false
+        },
+        "BLOCK_FOUR": {
+            "code": "{APPEND} out x",
+            "is_var": true
+        },
+        "BLOCK_FIVE": {
+            "code": "{CHAIN} BLOCK_SIX BLOCK_SEVEN",
+            "is_var": true},
+        "BLOCK_SIX": {
+            "code": "{APPEND} out y",
+            "is_var": true
+        },
+        "BLOCK_SEVEN": {
+            "code": "{SET} x BLOCK_EIGHT",
+            "is_var": true
+        },
+        "BLOCK_EIGHT": {
+            "code": "{EVAL} eqt x y",
+            "is_var": false
+        },
+        "BLOCK_NINE": {
+            "code": "{EVAL} eqt2 x z",
+            "is_var": false
+        }
+  },
+  "return_vars": [
+    "out",
+    "x"
+  ]
+}

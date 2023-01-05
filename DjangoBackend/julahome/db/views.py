@@ -1,10 +1,13 @@
 import datetime
-import re
+from pprint import pprint
+from uuid import uuid4
+import typing
 from pathlib import Path
 import os
 import json
 from django.contrib.auth import get_user_model
 from dotenv import load_dotenv
+from jsonschema import Draft202012Validator
 from rest_framework.decorators import api_view, permission_classes, authentication_classes, parser_classes
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
@@ -12,10 +15,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import BasicAuthentication
 from rest_framework_api_key.permissions import HasAPIKey
 
-from .models import Tag, Tag_Class
+from .models import Tag, Tag_Class, Layer, Tag_Layer_Model
 from .serializers import UserSerializer, TagClassSerializer, LayerFileSerializer, LayerSerializer, \
-    LayerParameterSerializer, LayerInputOutputSerializer, InputOutputChannelsSerializer, TagSerializer, \
-    TagLayerSerializer
+    LayerParameterSerializer, TagSerializer, TagLayerSerializer, JsonFileSerializer, InputOutputSerializer
 from rest_framework_api_key.models import APIKey
 
 # Create your views here.
@@ -28,67 +30,114 @@ with open(os.getenv("FIELDS_PATH"), "r") as f:
     j_val.update(json.load(f))
 
 
-def check_shapes(shape_json: list,
-                 parameter_keys: list,
-                 name: str):
-    cp_all_keys = set(j_val["allowed_keywords"])
-    cp_all_keys.update(set(parameter_keys))
+def check_tags(tag_list: list) -> tuple[bool, typing.Union[Response, None]]:
+    tag_schema = {
+        {"type": "string"},
+        {"type": "string"}
+    }
 
-    un_allowed = j_val["not_allowed_chars"]
+    tag_list_schema = {
+        "type": "array",
+        "items": tag_schema
+    }
 
-    for idx, data_dict in enumerate(shape_json):
-        var_set = set(data_dict["variables"])
+    validator = Draft202012Validator(schema=tag_list_schema)
 
-        data = data_dict
+    v = validator.is_valid(tag_list)
 
-        if len(var_set.difference(cp_all_keys)) != 0:
-            data = Response(["Name {}'s, variable provided in channel {} aren't valid".format(name,
-                                                                                              idx)], status=400)
-
-        elif len(data_dict["shape_str"]) != len(re.sub(un_allowed, '', data_dict["shape_str"])):
-            data = Response(["Name {}'s has a invalid Character in shape_str of channel {}".format(name,
-                                                                                                   idx)], status=400)
-
-        yield data, idx
+    if not v:
+        return False, Response(["Tag list does not follow proper structure"], status=400)
+    else:
+        return True, None
 
 
-def validate_parameter(parameter: dict,
-                       parameter_name: str):
-    def check_type(data_type, val):
+def check_type(v: typing.Any, class_str: str) -> tuple[bool, typing.Union[Response, None]]:
+    def check_types(d, d_type):
+        if type(d) != d_type:
+            return False, Response(["Value: {} is not of type: {}".format(d, d_type)], status=400)
+        else:
+            return True, None
 
-        if type(val) is not eval(j_val["valid_datatype"][data_type]):
-            return Response(["Value {} is not of the same type as {}, for param: {}".format(val,
-                                                                                            j_val[
-                                                                                                "valid_datatype"
-                                                                                            ][data_type],
-                                                                                            parameter_name)],
-                            status=400)
+    match class_str:
+        case "list":
+            d_t = list
+        case "int":
+            d_t = int
+        case "float":
+            d_t = float
+        case "str":
+            d_t = str
+        case "bool":
+            d_t = bool
+        case _:
+            return False, Response(["Invalid Type provided: type({}) != {}".format(v, class_str)],
+                                   status=400)
 
-    if parameter.get("options"):
+    return check_types(v, d_t)
 
-        try:
-            for i in parameter["options"]:
-                resp = check_type(parameter["type"], i)
-                if type(resp) == Response:
-                    return resp
 
-        except TypeError:
-            return Response(["Options provided are invalid, for param: {}".format(parameter_name)],
-                            status=400)
+def check_parameters(param_json: list) -> tuple[typing.Union[list, None], typing.Union[None, Response]]:
+    param_schema = {
+        "type": "object",
+        "properties": {
+            "param_name": {"type": "string"},
+            "description": {"type": "string"},
+            "default_value": {},
+            "type": {"type": "string"},
+            "options": {"type": ["null", "array"]},
+            "is_forward": {"enum": [True, False]},
+        },
+        "required": ["param_name", "description", "default_value", "type", "options", "is_forward"]
+    }
 
-    dtype_keys = set(j_val["valid_datatype"].keys())
+    schema = {
+        "type": "array",
+        "items": param_schema
+    }
 
-    if parameter["type"] not in dtype_keys:
-        return Response(["type {} is not a valid type".format(parameter["type"],
-                                                              parameter_name)],
-                        status=400)
+    validator = Draft202012Validator(schema=schema)
 
-    if parameter.get("default_value"):
-        resp = check_type(parameter["type"], parameter["default_value"]["default"])
-        if type(resp) == Response:
-            return resp
+    v = validator.is_valid(param_json)
 
-    return parameter
+    if not v:
+        x = [v0.message for v0 in sorted(validator.iter_errors(param_json), key=str)]
+        return None, Response(x, status=400)
+
+    for i in param_json:
+
+        tp = i.get("type")
+        val = i.get("default_value")
+
+        j_field = {}
+
+        if val:
+            status, resp = check_type(val, tp)
+
+            if status:
+                j_field["default_value"] = val
+            else:
+                return None, resp
+
+        val = i.get("options")
+
+        val_list = []
+        if val:
+            for v in val:
+                status, resp = check_type(v, tp)
+
+                if status:
+                    val_list.append(v)
+                else:
+                    return None, resp
+
+            j_field["options"] = val_list
+
+        i.pop("default_value")
+        i.pop("options")
+
+        i["default_and_options"] = j_field
+
+    return param_json, None
 
 
 @api_view(["PATCH"])
@@ -128,9 +177,8 @@ def grant_api_key(request):
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAuthenticated])
 def insert_tag_class(request):
-    data = request.data
-
     user = str(request.user)
+    print(user)
 
     model_data = get_user_model().objects.get(pk=user)
     if not model_data.is_staff:
@@ -171,109 +219,153 @@ def insert_layer_file(request):
 
 @api_view(["POST"])
 @permission_classes([HasAPIKey])
+@parser_classes([MultiPartParser, FormParser])
+def insert_json_file(request):
+    data = request.data
+
+    data = {"upload": data["file"]}
+
+    ser = JsonFileSerializer(data=data)
+
+    if ser.is_valid(raise_exception=True):
+        ser.save()
+
+        data = ser.data
+
+        data.pop("upload")
+        return Response(data, status=200)
+
+    return Response({"Invalid": "Improper data was sent"}, status=400)
+
+
+@api_view(["POST"])
+@permission_classes([HasAPIKey])
 def insert_layer(request):
     data = request.data
+    name_set = set()
+    has_forward_dict = data["forward_dict"]
 
     layer_data = {
         "layer_name": data.pop("layer_name"),
-        "layer_file_id": data.pop("layer_file_id")
+        "layer_file_id": data.pop("layer_file_id"),
+        "layer_json_id": data.pop("layer_json_id"),
+        "forward_list": data.pop("forward_list"),
+        "forward_dict": has_forward_dict,
+        "default": data.pop("default")
     }
 
     lyr_ser = LayerSerializer(data=layer_data)
+    lyr_ser.is_valid(raise_exception=True)
+    layer_id = lyr_ser.save().id
 
-    if lyr_ser.is_valid(raise_exception=True):
-        layer_id = lyr_ser.save().id
+    out_list = data.pop("forward_output_names")
+    f_list = [False] * len(out_list)
 
-    p_list = []
+    if has_forward_dict:
+        in_list = data.pop("forward_input_names")
+        t_list = [True] * len(in_list)
 
-    for d_k, d_v in data["parameter_dict"].items():
-        d_v["param_name"] = d_k
-        d_v["layer_id"] = layer_id
+        out_list += in_list
+        f_list += t_list
 
-        ret = validate_parameter(d_v, d_k)
-        if type(ret) == Response:
-            return ret
+    for d_dict, bol in zip(out_list, f_list):
+        d_dict["layer_id"] = layer_id
+        d_dict["is_output"] = bol
 
-        p_list.append(ret)
+        name_len = len(name_set)
 
-    lyr_ser = LayerParameterSerializer(data=p_list,
+        name_set.add(d_dict["name"])
+
+        if len(name_set) == name_len:
+            return Response(["Duplicate name was used in input / output"], status=200)
+
+    in_out_ser = InputOutputSerializer(data=out_list, many=True)
+
+    if not in_out_ser.is_valid():
+        instance = Layer.objects.get(id=layer_id)
+        instance.delete()
+        return Response(in_out_ser.errors, status=400)
+
+    par_list = data.pop("parameter")
+
+    for param_dict in par_list:
+        param_dict["layer_id"] = layer_id
+        name_len = len(name_set)
+        name_set.add(param_dict["param_name"])
+        if len(name_set) == name_len:
+            return Response(["Duplicate name was used in input / output"], status=200)
+
+    p_list, resp = check_parameters(par_list)
+
+    if resp:
+        return resp
+
+    par_ser = LayerParameterSerializer(data=p_list,
                                        many=True,
                                        allow_null=True)
 
-    if lyr_ser.is_valid(raise_exception=True):
-        lyr_ser.save()
+    if not par_ser.is_valid():
+        instance = Layer.objects.get(id=layer_id)
+        instance.delete()
+        return Response(par_ser.errors, status=400)
 
-    ii_list = ([{"is_input": True}] * len(data["input_shape"])) + ([{"is_input": False}] * len(data["output_shape"]))
+    in_out_ser.save()
+    par_ser.save()
 
-    in_out = data.pop("input_shape") + data.pop("output_shape")
+    return Response(lyr_ser.data, status=200)
 
-    for ii, io in (zip(ii_list, in_out)):
 
-        input_output = {"input_name": io["name"],
-                        "layer_id": layer_id}
+@api_view(["POST"])
+@authentication_classes([BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def insert_tag(request):
+    user = str(request.user)
 
-        input_output.update(ii)
+    model_data = get_user_model().objects.get(pk=user)
+    if not model_data.is_staff:
+        return Response({"invalid": "You are not a member of staff"}, status=400)
 
-        liop_ser = LayerInputOutputSerializer(data=input_output)
+    request.data["tag_name"] = request.data["tag_name"].upper()
+    request.data["tag_class_name"] = request.data["tag_class_name"].upper()
+    serializer = TagSerializer(data=request.data)
 
-        if liop_ser.is_valid(raise_exception=True):
-            liop_id = liop_ser.save().id
+    if serializer.is_valid(raise_exception=True):
+        instance = serializer.save()
+        tgc = instance.tag_class_name
+        tgc.tag_count += 1
+        tgc.save()
+        return Response(serializer.data, status=200)
+    else:
+        return Response({"invalid": "missing elements in data"}, status=400)
 
-        channel_list = []
-        for c_ret in check_shapes(io["shape"],
-                                  list(data["parameter_dict"].keys()),
-                                  io["name"]):
 
-            c_data, channel_num = c_ret
+@api_view(["POST"])
+@permission_classes([HasAPIKey])
+def insert_layer_tag(request):
+    req_list = []
+    for i in range(len(request.data)):
+        request.data[i]["tag_name"] = request.data[i]["tag_name"].upper()
 
-            if type(c_data) == Response:
-                return c_data
+        item = Tag_Layer_Model.objects.filter(tag_name=request.data[i]["tag_name"],
+                                              layer_id=request.data[i]["layer_id"])
 
-            channel_list.append({"input_id": liop_id,
-                                 "input_shape_str": c_data["shape_str"],
-                                 "variables": c_data["variables"],
-                                 "channel_number": channel_num,
-                                 "operation": c_data.get("operation")})
+        print(item)
 
-        c_ser = InputOutputChannelsSerializer(data=channel_list,
-                                              many=True)
+        if not item.exists():
+            req_list.append(request.data[i])
 
-        if c_ser.is_valid(raise_exception=True):
-            c_ser.save()
+    serializer = TagLayerSerializer(data=req_list,
+                                    many=True)
 
-    tag_list = data.pop("tags")
+    if serializer.is_valid(raise_exception=True):
 
-    for tag in tag_list:
-        tag["tag_name"] = tag["tag_name"].lower()
+        tag_list = serializer.save()
 
-        qs = Tag.objects.filter(pk=tag["tag_name"])
+        for tag in tag_list:
+            tgn = tag.tag_name
+            tgn.count += 1
+            tgn.save()
 
-        if qs.exists():
-
-            for t in qs:
-                t.count += 1
-
-                tag_class_name = t.tag_class_name.tag_class_name
-                t.save()
-        else:
-            tag_ser = TagSerializer(data=tag)
-
-            if tag_ser.is_valid(raise_exception=True):
-                tag_class_name = tag_ser.save().tag_class_name.tag_class_name
-
-            t_c = Tag_Class.objects.get(pk=tag_class_name)
-
-            t_c.tag_count += 1
-
-            t_c.save()
-
-    for tag in tag_list:
-        tag["layer_id"] = layer_id
-
-    tag_lay_ser = TagLayerSerializer(data=tag_list,
-                                     many=True)
-
-    if tag_lay_ser.is_valid(raise_exception=True):
-        tag_lay_ser.save()
-
-    return Response(["The data was successfully stored"], status=200)
+        return Response(serializer.data, status=200)
+    else:
+        return Response({"invalid": "missing elements in data"}, status=400)

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 
-class LinearLayer(nn.Module):
+class TestLinearLayer(nn.Module):
 
     def __init__(self,
                  in_features: int,
@@ -16,16 +16,19 @@ class LinearLayer(nn.Module):
         bias: Determines whether the layer will learn an additive bias.
         """
 
-        super(LinearLayer, self).__init__()
+        super(TestLinearLayer, self).__init__()
 
         self.__linear = nn.Linear(in_features,
                                   out_features,
                                   bias)
 
     def forward(self,
-                x: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
+                input_dict: dict[str, torch.Tensor],
+                variable_dict: dict) -> dict[str, torch.Tensor]:
 
-        x = x["input"]
+        print(variable_dict["test_bool"])
+
+        x = input_dict["input"]
         """
 
         Parameters

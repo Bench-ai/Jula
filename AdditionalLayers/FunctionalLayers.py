@@ -7,7 +7,6 @@ from AdditionalLayers.BaseLayer import check_multi_size
 class ConcatenationLayer(nn.Module):
 
     def __init__(self,
-                 target_shape_list: list[tuple[int, ...]],
                  dim: int):
         """
         Parameters
@@ -17,7 +16,7 @@ class ConcatenationLayer(nn.Module):
         """
 
         super(ConcatenationLayer, self).__init__()
-        self.__target_shape_list = [torch.Size(i) for i in target_shape_list]
+        # self.__target_shape_list = [torch.Size(i) for i in target_shape_list]
         self.__dim = dim
 
     def forward(self,
