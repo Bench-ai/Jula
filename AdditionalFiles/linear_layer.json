@@ -1,0 +1,143 @@
+{
+    "input_script": {
+        "variables":[
+            {
+                "name": "ret_bool",
+                "parameter": false,
+                "type": "bool",
+                "value": "False"
+            },
+            {
+                "name": "ret_str",
+                "parameter": false,
+                "type": "str",
+                "value": "valid"
+            },
+            {
+                "name": "input",
+                "parameter": true,
+                "type": "list",
+                "value": null
+            },
+            {
+                "name": "in_features",
+                "parameter": true,
+                "type": "int",
+                "value": null
+            },
+            {
+                "name": "in_list",
+                "parameter": false,
+                "type": "list",
+                "value": "[]"
+            },
+            {
+                "name": "x",
+                "parameter": false,
+                "type": "int",
+                "value": "0"
+            },
+            {
+                "name": "error_one",
+                "parameter": false,
+                "type": "str",
+                "value": "Shape of expected array is supposed to be of size ['BATCH', 'in_features']"
+            },
+            {
+                "name": "true_var",
+                "parameter": false,
+                "type": "bool",
+                "value": "True"
+            }
+        ],
+        "equations":  [],
+        "command_strings": [
+            "{APPEND} in_list BLOCK_ZERO",
+            "{APPEND} in_list in_features",
+            "{IF_ELSE} BLOCK_ONE BLOCK_TWO BLOCK_THREE"
+        ],
+        "blocks": [
+            {
+                "name": "BLOCK_ZERO",
+                "code": "{GET_ITEM} input x",
+                "is_var": false
+            },
+            {
+                "name": "BLOCK_TWO",
+                "code": "{SET} ret_bool true_var",
+                "is_var": true
+            },
+            {
+                "name": "BLOCK_ONE",
+                "code": "{EQUALS} in_list input",
+                "is_var": false
+            },
+            {
+                "name": "BLOCK_THREE",
+                "code": "{SET} ret_str error_one",
+                "is_var": true
+            }
+        ],
+        "return_vars": [
+            "ret_bool",
+            "ret_str"
+        ]
+    },
+    "output_script": {
+        "variables": [
+            {
+                "name": "ret_bool",
+                "parameter": false,
+                "type": "bool",
+                "value": "True"
+            },
+            {
+                "name": "ret_str",
+                "parameter": false,
+                "type": "str",
+                "value": "valid"
+            },
+            {
+                "name": "output",
+                "parameter": false,
+                "type": "list",
+                "value": "[]"
+            },
+            {
+                "name": "out_features",
+                "parameter": true,
+                "type": "int",
+                "value": null
+            },
+            {
+                "name": "input",
+                "parameter": true,
+                "type": "list",
+                "value": "[]"
+            },
+            {
+                "name": "x",
+                "parameter": false,
+                "type": "int",
+                "value": "0"
+            }
+        ],
+        "equations": [],
+        "command_strings": [
+            "{APPEND} output BLOCK_ZERO",
+            "{APPEND} output out_features"
+        ],
+        "blocks": [
+            {
+                "name": "BLOCK_ZERO",
+                "code": "{GET_ITEM} input x",
+                "is_var": false
+            }
+        ],
+        "return_vars":[
+            "ret_bool",
+            "ret_str",
+            "output"
+        ]
+    }
+}

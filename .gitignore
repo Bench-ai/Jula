@@ -5,3 +5,4 @@ venv/
 .env
 migrations
 media
+mytest.py

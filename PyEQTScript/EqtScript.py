@@ -68,6 +68,15 @@ class EqtScriptParser:
                         ret_val = (value, str)
                     else:
                         ret_val = (None, str)
+
+                case "bool":
+                    if value:
+                        if not param:
+                            value = False if (value.lower() == "false") else True
+
+                        ret_val = (value, bool)
+                    else:
+                        ret_val = (None, bool)
                 case _:
                     raise InvalidTypeException("Invalid Type provided")
 
@@ -87,11 +96,13 @@ class EqtScriptParser:
     def __init__(self,
                  var_dict: dict,
                  eqt_list: list,
+                 command_list: list,
                  par: dict,
                  block_dict: dict,
                  return_val: list):
 
         self.var_dict = (var_dict, par, eqt_list)
+        self.__command_list = command_list
         self.__block_dict = block_dict
         self.__ret = return_val
 
@@ -271,8 +282,8 @@ class EqtScriptParser:
             op, pars = self.get_split_command(line)
             self.__process_line(op, pars)
 
-    def get_out_shape(self, command_list):
+    def get_out_shape(self):
 
-        self.__parse_general_eqt(command_list)
+        self.__parse_general_eqt(self.__command_list)
 
-        return [self.__var_dict[i]["value"] for i in self.__ret]
+        return [{i: self.__var_dict[i]["value"]} for i in self.__ret]
